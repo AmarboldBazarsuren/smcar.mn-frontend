@@ -4,63 +4,48 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
 import CarDetail from './pages/CarDetail'
+import BrandPage from './pages/BrandPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
-// Scroll to top
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
 
-// Admin route guard
 function AdminRoute({ children }) {
   const token = localStorage.getItem('adminToken')
-  if (!token) return <Navigate to="/admin/login" replace/>
+  if (!token) return <Navigate to="/admin/login" replace />
   return children
-}
-
-// Admin pages - navbar-гүй
-function AdminLayout({ children }) {
-  return <>{children}</>
-}
-
-// Public pages - navbar-тай
-function PublicLayout({ children }) {
-  return (
-    <>
-      <Navbar/>
-      {children}
-    </>
-  )
 }
 
 export default function App() {
   const location = useLocation()
-  const isAdmin  = location.pathname.startsWith('/admin')
+  const isAdmin = location.pathname.startsWith('/admin')
 
   return (
     <>
-      <ScrollToTop/>
-      {!isAdmin && <Navbar/>}
+      <ScrollToTop />
+      {!isAdmin && <Navbar />}
 
       <Routes>
         {/* Public */}
-        <Route path="/"         element={<Home/>}/>
-        <Route path="/catalog"  element={<Catalog/>}/>
-        <Route path="/car/:id"  element={<CarDetail/>}/>
+        <Route path="/" element={<Home />} />
+        <Route path="/catalog" element={<Catalog />} />
+        <Route path="/catalog/:brand" element={<BrandPage />} />
+        <Route path="/car/:id" element={<CarDetail />} />
 
         {/* Admin */}
-        <Route path="/admin/login" element={<AdminLogin/>}/>
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={
           <AdminRoute>
-            <AdminDashboard/>
+            <AdminDashboard />
           </AdminRoute>
-        }/>
+        } />
 
         {/* 404 */}
-        <Route path="*" element={<NotFound/>}/>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   )
@@ -75,9 +60,9 @@ function NotFound() {
       gap: 16, fontFamily: 'var(--font-display)',
     }}>
       <span style={{ fontSize: 56 }}>🚗</span>
-      <h1 style={{ fontSize: 40, color: 'var(--text-0)' }}>404</h1>
-      <p style={{ color: 'var(--text-2)' }}>Хуудас олдсонгүй</p>
-      <a href="/" style={{ color: 'var(--gold)', fontSize: 14 }}>← Нүүр хуудас руу буцах</a>
+      <h1 style={{ fontSize: 40, color: 'var(--text-0, #111)' }}>404</h1>
+      <p style={{ color: 'var(--text-2, #888)' }}>Хуудас олдсонгүй</p>
+      <a href="/" style={{ color: 'var(--gold, #B8860B)', fontSize: 14 }}>← Нүүр хуудас руу буцах</a>
     </div>
   )
 }
