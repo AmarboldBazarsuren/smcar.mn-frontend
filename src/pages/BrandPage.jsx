@@ -10,7 +10,7 @@ const BRAND_ICONS = {
   'Volkswagen': '🔵', 'Porsche': '🏎️', 'Volvo': '🔷',
   'Toyota': '🔴', 'Honda': '🔴', 'Lexus': '🔷',
   'Nissan': '🔴', 'Mazda': '🔴',
-  'Land Rover': '🟢', 'Jaguar': '🐆', 'Mini': '🇬🇧',
+'Land Rover': '🟢', 'Jaguar': '🐆', 'Mini': '🇬🇧',
   'Tesla': '⚡', 'Ford': '🔵', 'Chevrolet': '🇺🇸',
   'Jeep': '🟢', 'Cadillac': '🎩',
   'Renault': '🇫🇷', 'SsangYong': '🇰🇷',

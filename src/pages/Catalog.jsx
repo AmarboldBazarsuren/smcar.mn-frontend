@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { vehicleAPI } from '../services/api'
+import { vehicleAPI, marketAPI } from '../services/api'
 import CarCard from '../components/CarCard'
 import styles from './Catalog.module.css'
 
@@ -11,7 +11,6 @@ const SORT_OPTIONS = [
   { value: '-year',      label: 'Шинэ он эхэнд' },
   { value: 'mileage',    label: 'Явсан зам бага' },
 ]
-
 const FUEL_TYPES = [
   { v: 'Gasoline', l: 'Бензин' },
   { v: 'Diesel',   l: 'Дизель' },
@@ -32,18 +31,28 @@ const BODY_TYPES = [
   { v: 'Pickup',    l: 'Пикап' },
 ]
 
+const BRANDS_PER_PAGE = 10
+
 export default function Catalog() {
   const [searchParams] = useSearchParams()
 
+  // ── Grid view ──
   const [vehicles,    setVehicles]    = useState([])
   const [total,       setTotal]       = useState(0)
   const [page,        setPage]        = useState(1)
   const [hasNext,     setHasNext]     = useState(false)
   const [loading,     setLoading]     = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [showFilter,  setShowFilter]  = useState(false)
-  // 'grouped' = брэндээр ангилсан, 'grid' = бүгд нэг grid
-  const [viewMode,    setViewMode]    = useState('grouped')
+
+  // ── Grouped view ──
+  const [brandGroups,    setBrandGroups]    = useState([])  // [{ brand, count, cars }]
+  const [allBrands,      setAllBrands]      = useState([])  // бүх брэнд + тоо
+  const [groupedLoading, setGroupedLoading] = useState(true)
+  const [groupedPage,    setGroupedPage]    = useState(1)
+  const [loadingMoreBrands, setLoadingMoreBrands] = useState(false)
+
+  const [showFilter, setShowFilter] = useState(false)
+  const [viewMode,   setViewMode]   = useState('grouped')
 
   const [filters, setFilters] = useState({
     search:       searchParams.get('search')       || '',
@@ -59,11 +68,61 @@ export default function Catalog() {
   })
 
   const debounceRef = useRef(null)
-  const hasActiveFilter = !!(filters.search || filters.brand || filters.year_min ||
+  const hasActiveFilter = !!(
+    filters.search || filters.brand || filters.year_min ||
     filters.year_max || filters.price_min || filters.price_max ||
-    filters.fuel_type || filters.transmission || filters.body_type)
+    filters.fuel_type || filters.transmission || filters.body_type
+  )
 
-  const fetchVehicles = useCallback(async (pageNum = 1, reset = true) => {
+  // ─────────────────────────────────────────
+  // GROUPED VIEW
+  // ─────────────────────────────────────────
+  const fetchGrouped = useCallback(async (pg = 1, append = false) => {
+    if (!append) setGroupedLoading(true)
+    else setLoadingMoreBrands(true)
+
+    try {
+      // Брэнд жагсаалт — зөвхөн эхний удаа татна
+      let brands = allBrands
+      if (brands.length === 0) {
+        const res = await marketAPI.brands()
+        brands = (res?.data || []).sort((a, b) => b.count - a.count)
+        setAllBrands(brands)
+        setTotal(brands.reduce((s, b) => s + b.count, 0))
+      }
+
+      // Энэ хуудасны брэндүүд
+      const start      = (pg - 1) * BRANDS_PER_PAGE
+      const pageBrands = brands.slice(start, start + BRANDS_PER_PAGE)
+      if (pageBrands.length === 0) return
+
+      // Брэнд бүрт зэрэг хүсэлт
+      const results = await Promise.all(
+        pageBrands.map(b =>
+          vehicleAPI.list({ brand: b.name, limit: 4, sort: filters.sort })
+            .then(res => ({
+              brand: b.name,
+              count: b.count,
+              cars:  res?.data?.vehicles || [],
+            }))
+            .catch(() => ({ brand: b.name, count: b.count, cars: [] }))
+        )
+      )
+
+      setBrandGroups(prev => append ? [...prev, ...results] : results)
+      setGroupedPage(pg)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setGroupedLoading(false)
+      setLoadingMoreBrands(false)
+    }
+  }, [filters.sort, allBrands])
+
+  // ─────────────────────────────────────────
+  // GRID VIEW
+  // ─────────────────────────────────────────
+  const fetchGrid = useCallback(async (pageNum = 1, reset = true) => {
     if (reset) setLoading(true)
     else setLoadingMore(true)
     try {
@@ -78,7 +137,7 @@ export default function Catalog() {
       if (filters.transmission) params.transmission = filters.transmission
       if (filters.body_type)    params.body_type    = filters.body_type
 
-      const res  = await vehicleAPI.list(params)
+      const res = await vehicleAPI.list(params)
       const list = res?.data?.vehicles || []
       const pag  = res?.data?.pagination || {}
 
@@ -86,25 +145,41 @@ export default function Catalog() {
       else       setVehicles(v => [...v, ...list])
       setTotal(pag.total || 0)
       setHasNext(pag.hasNext || false)
-    } catch (e) { console.error(e) }
-    finally {
+    } catch (e) {
+      console.error(e)
+    } finally {
       setLoading(false)
       setLoadingMore(false)
     }
   }, [filters])
 
+  // ─────────────────────────────────────────
+  // EFFECTS
+  // ─────────────────────────────────────────
   useEffect(() => {
     clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => { setPage(1); fetchVehicles(1, true) }, 380)
+    debounceRef.current = setTimeout(() => {
+      setPage(1)
+      setGroupedPage(1)
+      setAllBrands([])   // брэнд жагсаалтыг цэвэрлэж шинэчлэнэ
+      setBrandGroups([])
+      if (viewMode === 'grouped') {
+        fetchGrouped(1, false)
+      } else {
+        fetchGrid(1, true)
+      }
+    }, 380)
     return () => clearTimeout(debounceRef.current)
-  }, [filters])
+  }, [filters, viewMode])
 
-  // Filter өөрчлөгдөхөд filter байгаа бол grid горим руу шилжих
   useEffect(() => {
     if (hasActiveFilter) setViewMode('grid')
     else setViewMode('grouped')
   }, [hasActiveFilter])
 
+  // ─────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────
   const set    = (key, val) => setFilters(f => ({ ...f, [key]: val }))
   const toggle = (key, val) => setFilters(f => ({ ...f, [key]: f[key] === val ? '' : val }))
   const resetFilters = () => setFilters({
@@ -113,28 +188,13 @@ export default function Catalog() {
     transmission: '', body_type: '', sort: '-createdAt',
   })
 
-  const loadMore = () => {
-    const next = page + 1; setPage(next); fetchVehicles(next, false)
-  }
+  const hasMoreBrands = allBrands.length > groupedPage * BRANDS_PER_PAGE
 
   const activeCount = [
     filters.brand, filters.year_min, filters.year_max,
     filters.price_min, filters.price_max, filters.fuel_type,
     filters.transmission, filters.body_type,
   ].filter(Boolean).length
-
-  // Брэндээр ангилах
-  const groupedByBrand = (() => {
-    if (viewMode !== 'grouped') return {}
-    const groups = {}
-    vehicles.forEach(car => {
-      const b = car.brand || 'Бусад'
-      if (!groups[b]) groups[b] = []
-      groups[b].push(car)
-    })
-    return Object.entries(groups)
-      .sort((a, b) => b[1].length - a[1].length)
-  })()
 
   const pageTitle = (() => {
     if (filters.body_type) return BODY_TYPES.find(b => b.v === filters.body_type)?.l + ' машинууд'
@@ -152,10 +212,11 @@ export default function Catalog() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>{pageTitle}</h1>
-            {!loading && <p className={styles.count}>{total.toLocaleString()} машин</p>}
+            {!(groupedLoading || loading) && (
+              <p className={styles.count}>{total.toLocaleString()} машин</p>
+            )}
           </div>
           <div className={styles.controls}>
-            {/* View toggle — зөвхөн filter байхгүй үед */}
             {!hasActiveFilter && (
               <div className={styles.viewToggle}>
                 <button
@@ -184,7 +245,11 @@ export default function Catalog() {
                 </button>
               </div>
             )}
-            <select className={styles.sortSelect} value={filters.sort} onChange={e => set('sort', e.target.value)}>
+            <select
+              className={styles.sortSelect}
+              value={filters.sort}
+              onChange={e => set('sort', e.target.value)}
+            >
               {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
             <button
@@ -202,14 +267,16 @@ export default function Catalog() {
           </div>
         </div>
 
-        {/* Active filter badges */}
+        {/* Active badges */}
         {activeCount > 0 && (
           <div className={styles.activeBadges}>
-            {filters.brand     && <Badge label={filters.brand} onRemove={() => set('brand', '')} />}
-            {filters.body_type && <Badge label={BODY_TYPES.find(b => b.v === filters.body_type)?.l || filters.body_type} onRemove={() => set('body_type', '')} />}
-            {filters.fuel_type && <Badge label={FUEL_TYPES.find(f => f.v === filters.fuel_type)?.l || filters.fuel_type} onRemove={() => set('fuel_type', '')} />}
+            {filters.brand        && <Badge label={filters.brand} onRemove={() => set('brand', '')} />}
+            {filters.body_type    && <Badge label={BODY_TYPES.find(b => b.v === filters.body_type)?.l || filters.body_type} onRemove={() => set('body_type', '')} />}
+            {filters.fuel_type    && <Badge label={FUEL_TYPES.find(f => f.v === filters.fuel_type)?.l || filters.fuel_type} onRemove={() => set('fuel_type', '')} />}
             {filters.transmission && <Badge label={filters.transmission === 'Automatic' ? 'Автомат' : 'Механик'} onRemove={() => set('transmission', '')} />}
-            {(filters.year_min || filters.year_max) && <Badge label={`${filters.year_min || ''}–${filters.year_max || ''} он`} onRemove={() => { set('year_min', ''); set('year_max', '') }} />}
+            {(filters.year_min || filters.year_max) && (
+              <Badge label={`${filters.year_min || ''}–${filters.year_max || ''} он`} onRemove={() => { set('year_min', ''); set('year_max', '') }} />
+            )}
             <button className={styles.clearAll} onClick={resetFilters}>Бүгдийг арилгах</button>
           </div>
         )}
@@ -281,78 +348,98 @@ export default function Catalog() {
           </div>
         )}
 
-        {/* ── Car list ── */}
-        {loading ? (
-          <div className="car-grid" style={{ marginTop: 24 }}>
-            {[...Array(12)].map((_, i) => <div key={i} className="skeleton" style={{ height: 320, borderRadius: 14 }} />)}
-          </div>
-        ) : vehicles.length === 0 ? (
-          <div className={styles.empty}>
-            <div className={styles.emptyIcon}>🚗</div>
-            <h3>Машин олдсонгүй</h3>
-            <p>Шүүлтийн нөхцлийг өөрчилж үзнэ үү</p>
-            {activeCount > 0 && <button className={styles.emptyBtn} onClick={resetFilters}>Шүүлт арилгах</button>}
-          </div>
-        ) : viewMode === 'grouped' ? (
-          /* ── GROUPED VIEW: брэндээр ангилсан ── */
-          <div className={styles.groupedView}>
-            {groupedByBrand.map(([brand, cars]) => (
-              <div key={brand} className={styles.brandSection}>
-                <div className={styles.brandSectionHeader}>
-                  <h2 className={styles.brandSectionTitle}>{brand}</h2>
-                  <span className={styles.brandSectionCount}>{cars.length} машин</span>
-                  <Link
-                    to={`/catalog/${encodeURIComponent(brand)}`}
-                    className={styles.brandSectionLink}
-                  >
-                    Бүгдийг харах →
-                  </Link>
-                </div>
-                <div className="car-grid">
-                  {cars.slice(0, 4).map((car, i) => (
-                    <div key={car._id} className="fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
-                      <CarCard car={car} />
-                    </div>
-                  ))}
-                </div>
-                {cars.length > 4 && (
-                  <div className={styles.brandSeeMore}>
-                    <Link to={`/catalog/${encodeURIComponent(brand)}`} className={styles.seeMoreBtn}>
-                      + {cars.length - 4} машин дэлгэрэнгүй харах
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ))}
-            {hasNext && (
-              <div className={styles.loadMore}>
-                <button className={styles.loadMoreBtn} onClick={loadMore} disabled={loadingMore}>
-                  {loadingMore ? <span className={styles.spinner}/> : 'Дараагийн брэндүүд'}
-                </button>
-                <p className={styles.loadMoreInfo}>{vehicles.length} / {total.toLocaleString()}</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* ── GRID VIEW: бүгд нэг grid ── */
-          <>
+        {/* ── GROUPED VIEW ── */}
+        {viewMode === 'grouped' && (
+          groupedLoading ? (
             <div className="car-grid" style={{ marginTop: 24 }}>
-              {vehicles.map((car, i) => (
-                <div key={car._id} className="fade-up" style={{ animationDelay: `${(i % 9) * 0.04}s` }}>
-                  <CarCard car={car} />
-                </div>
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: 320, borderRadius: 14 }} />
               ))}
             </div>
-            {hasNext && (
-              <div className={styles.loadMore}>
-                <button className={styles.loadMoreBtn} onClick={loadMore} disabled={loadingMore}>
-                  {loadingMore ? <span className={styles.spinner}/> : 'Дараагийн машинууд'}
-                </button>
-                <p className={styles.loadMoreInfo}>{vehicles.length} / {total.toLocaleString()}</p>
-              </div>
-            )}
-          </>
+          ) : (
+            <div className={styles.groupedView}>
+              {brandGroups.map(({ brand, count, cars }) => (
+                <div key={brand} className={styles.brandSection}>
+                  <div className={styles.brandSectionHeader}>
+                    <h2 className={styles.brandSectionTitle}>{brand}</h2>
+                    <span className={styles.brandSectionCount}>{count.toLocaleString()} машин</span>
+                    <Link to={`/catalog/${encodeURIComponent(brand)}`} className={styles.brandSectionLink}>
+                      Бүгдийг харах →
+                    </Link>
+                  </div>
+                  <div className="car-grid">
+                    {cars.map((car, i) => (
+                      <div key={car._id} className="fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
+                        <CarCard car={car} />
+                      </div>
+                    ))}
+                  </div>
+                  {count > 4 && (
+                    <div className={styles.brandSeeMore}>
+                      <Link to={`/catalog/${encodeURIComponent(brand)}`} className={styles.seeMoreBtn}>
+                        + {(count - 4).toLocaleString()} машин дэлгэрэнгүй харах
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {hasMoreBrands && (
+                <div className={styles.loadMore}>
+                  <button
+                    className={styles.loadMoreBtn}
+                    onClick={() => fetchGrouped(groupedPage + 1, true)}
+                    disabled={loadingMoreBrands}
+                  >
+                    {loadingMoreBrands ? <span className={styles.spinner} /> : 'Дараагийн брэндүүд'}
+                  </button>
+                  <p className={styles.loadMoreInfo}>{brandGroups.length} / {allBrands.length} брэнд</p>
+                </div>
+              )}
+            </div>
+          )
         )}
+
+        {/* ── GRID VIEW ── */}
+        {viewMode === 'grid' && (
+          loading ? (
+            <div className="car-grid" style={{ marginTop: 24 }}>
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: 320, borderRadius: 14 }} />
+              ))}
+            </div>
+          ) : vehicles.length === 0 ? (
+            <div className={styles.empty}>
+              <div className={styles.emptyIcon}>🚗</div>
+              <h3>Машин олдсонгүй</h3>
+              <p>Шүүлтийн нөхцлийг өөрчилж үзнэ үү</p>
+              {activeCount > 0 && <button className={styles.emptyBtn} onClick={resetFilters}>Шүүлт арилгах</button>}
+            </div>
+          ) : (
+            <>
+              <div className="car-grid" style={{ marginTop: 24 }}>
+                {vehicles.map((car, i) => (
+                  <div key={car._id} className="fade-up" style={{ animationDelay: `${(i % 9) * 0.04}s` }}>
+                    <CarCard car={car} />
+                  </div>
+                ))}
+              </div>
+              {hasNext && (
+                <div className={styles.loadMore}>
+                  <button
+                    className={styles.loadMoreBtn}
+                    onClick={() => { const n = page + 1; setPage(n); fetchGrid(n, false) }}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? <span className={styles.spinner} /> : 'Дараагийн машинууд'}
+                  </button>
+                  <p className={styles.loadMoreInfo}>{vehicles.length} / {total.toLocaleString()}</p>
+                </div>
+              )}
+            </>
+          )
+        )}
+
       </div>
     </div>
   )

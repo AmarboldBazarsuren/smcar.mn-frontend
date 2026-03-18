@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { vehicleAPI } from '../services/api'
+import { vehicleAPI, marketAPI } from '../services/api'
 import CarCard from '../components/CarCard'
 import styles from './Home.module.css'
 
@@ -13,7 +13,7 @@ const BRANDS = [
   { id: 'Audi',          label: 'Audi'          },
   { id: 'Porsche',       label: 'Porsche'       },
   { id: 'Toyota',        label: 'Toyota'        },
-  { id: 'Range Rover',    label: 'Range Rover'    },
+{ id: 'Land Rover', label: 'Range Rover' },
   { id: 'Lexus',         label: 'Lexus'         },
   { id: 'Volvo',         label: 'Volvo'         },
   { id: 'Tesla',         label: 'Tesla'         },
@@ -35,21 +35,31 @@ const CATEGORIES = [
 ]
 
 export default function Home() {
-  const [featured,     setFeatured]     = useState([])
-  const [stats,        setStats]        = useState(null)
-  const [loading,      setLoading]      = useState(true)
-  const [search,       setSearch]       = useState('')
-  const [brandCounts,  setBrandCounts]  = useState({})
+  const [featured,    setFeatured]    = useState([])
+  const [stats,       setStats]       = useState(null)
+  const [loading,     setLoading]     = useState(true)
+  const [search,      setSearch]      = useState('')
+  const [brandCounts, setBrandCounts] = useState({})
   const navigate = useNavigate()
 
   useEffect(() => {
-    Promise.allSettled([vehicleAPI.featured(8), vehicleAPI.stats()]).then(([f, s]) => {
-      if (f.status === 'fulfilled') setFeatured(f.value?.data || [])
+    Promise.allSettled([
+      vehicleAPI.featured(8),
+      vehicleAPI.stats(),
+      marketAPI.brands(),   // ← брэнд бүрийн жинхэнэ тоог авна
+    ]).then(([f, s, b]) => {
+      if (f.status === 'fulfilled') {
+        setFeatured(f.value?.data || [])
+      }
       if (s.status === 'fulfilled') {
-        const d = s.value?.data || null
-        setStats(d)
+        setStats(s.value?.data || null)
+      }
+      if (b.status === 'fulfilled') {
+        // marketAPI.brands() → [{ id, name, count }]
         const counts = {}
-        if (d?.topBrands) d.topBrands.forEach(b => { counts[b._id] = b.count })
+        ;(b.value?.data || []).forEach(item => {
+          counts[item.name] = item.count
+        })
         setBrandCounts(counts)
       }
       setLoading(false)
@@ -77,7 +87,7 @@ export default function Home() {
               <p className={'fade-up ' + styles.heroTag}>Солонгосын шууд зах зээл</p>
               <h1 className={'fade-up fade-up-1 ' + styles.heroTitle}>
                 Smcar.mn
-                <em className={styles.accent}> Солонгосоос машин захиалах</em>
+                <em className={styles.accent}> Хүссэн машинаа Солонгосоос захиалцаая</em>
               </h1>
               <form className={'fade-up fade-up-2 ' + styles.heroSearch} onSubmit={goSearch}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -112,7 +122,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* АНГИЛАЛ + БРЭНД — нягт, icon-гүй */}
+      {/* АНГИЛАЛ + БРЭНД */}
       <section className={styles.quickSection}>
         <div className="container">
           <div className={styles.quickGrid}>
@@ -145,7 +155,9 @@ export default function Home() {
                   >
                     {b.label}
                     {brandCounts[b.id] > 0 && (
-                      <span className={styles.brandItemCount}>{brandCounts[b.id]}</span>
+                      <span className={styles.brandItemCount}>
+                        {brandCounts[b.id].toLocaleString()}
+                      </span>
                     )}
                   </Link>
                 ))}
@@ -162,14 +174,16 @@ export default function Home() {
           <SecHead eye="Шинэ зарууд" title="Сүүлд нэмэгдсэн машинууд" link="/catalog"/>
           {loading ? (
             <div className="car-grid">
-              {[...Array(8)].map((_, i) => <div key={i} className="skeleton" style={{height: 280, borderRadius: 14}}/>)}
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="skeleton" style={{ height: 280, borderRadius: 14 }}/>
+              ))}
             </div>
           ) : featured.length === 0 ? (
             <p className={styles.empty}>Одоогоор машин байхгүй байна</p>
           ) : (
             <div className="car-grid">
               {featured.map((car, i) => (
-                <div key={car._id} className="fade-up" style={{animationDelay: i * 0.04 + 's'}}>
+                <div key={car._id} className="fade-up" style={{ animationDelay: i * 0.04 + 's' }}>
                   <CarCard car={car}/>
                 </div>
               ))}
@@ -211,14 +225,18 @@ export default function Home() {
               <div className={styles.promoBox}>
                 <p className={styles.promoBoxTitle}>Үнийн жишээ тооцоолол</p>
                 {[
-                  ['Солонгос үнэ',   '₩3,500만'],
+                  ['Солонгос үнэ',      '₩3,500만'],
                   ['Үндсэн үнэ (×3.2)', '112,000,000₮'],
-                  ['Тээврийн зардал', '5,343,000₮'],
-                  ['Гааль / татвар', '26,601,255₮'],
+                  ['Тээврийн зардал',   '5,343,000₮'],
+                  ['Гааль / татвар',    '26,601,255₮'],
                 ].map(([l, v]) => (
-                  <div key={l} className={styles.promoRow}><span>{l}</span><span>{v}</span></div>
+                  <div key={l} className={styles.promoRow}>
+                    <span>{l}</span><span>{v}</span>
+                  </div>
                 ))}
-                <div className={styles.promoTotal}><span>Нийт дүн</span><span>143,944,255₮</span></div>
+                <div className={styles.promoTotal}>
+                  <span>Нийт дүн</span><span>143,944,255₮</span>
+                </div>
               </div>
             </div>
           </div>
@@ -242,6 +260,7 @@ export default function Home() {
           <p className={styles.footerCopy}>© 2025 smcar.mn</p>
         </div>
       </footer>
+
     </div>
   )
 }
