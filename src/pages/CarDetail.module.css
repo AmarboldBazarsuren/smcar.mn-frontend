@@ -54,11 +54,8 @@
 .galleryCol {}
 
 /* =====================================================
-   GALLERY — Desktop: зураг зүүн, thumbnail баруун
-   galleryWrapper-д fixed height өгнө.
-   Хоёр child тэр height-г дүүргэнэ.
-   thumbStack overflow-y: auto тул хэдэн зураг ч байсан
-   layout эвдэхгүй — дотроо scroll хийнэ.
+   DESKTOP GALLERY
+   galleryWrapper: row — зураг зүүн, thumb баруун
 ===================================================== */
 .galleryWrapper {
   display: flex;
@@ -122,7 +119,9 @@
   font-size: 28px; font-weight: 800; color: var(--red); letter-spacing: 2px;
 }
 
-/* Thumbnail — баруун талд, дотроо vertical scroll */
+/* =====================================================
+   DESKTOP THUMBNAILS — баруун талд, vertical scroll
+===================================================== */
 .thumbStack {
   width: 90px;
   flex-shrink: 0;
@@ -138,10 +137,15 @@
 .thumbStack::-webkit-scrollbar { width: 3px; }
 .thumbStack::-webkit-scrollbar-thumb { background: var(--gray-3); border-radius: 99px; }
 
+/* KEY FIX: flex-shrink:0 + explicit width + height 
+   flex-shrink:0 ensures items never compress */
 .thumbStackItem {
-  width: 100%;
-  height: 68px;
-  flex-shrink: 0;
+  width: 90px !important;
+  min-width: 90px !important;
+  height: 68px !important;
+  min-height: 68px !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
   border-radius: var(--r-sm);
   overflow: hidden;
   background: var(--gray-1);
@@ -150,6 +154,7 @@
   cursor: pointer;
   display: block;
   padding: 0;
+  box-sizing: border-box;
 }
 .thumbStackItem img {
   width: 100%; height: 100%;
@@ -172,7 +177,8 @@
 }
 .imgCountLoading { font-size: 10px; color: var(--gray-4); animation: pulse 1s infinite; }
 .thumbLoading {
-  width: 100%; height: 68px; flex-shrink: 0;
+  width: 90px !important; height: 68px !important;
+  flex-shrink: 0;
   border-radius: var(--r-sm); background: var(--gray-1);
   border: 1px solid var(--gray-2);
   display: flex; align-items: center; justify-content: center;
@@ -362,7 +368,6 @@
    RESPONSIVE
 ================================================ */
 
-/* Tablet */
 @media (max-width: 1024px) {
   .layout { grid-template-columns: 1fr; gap: 0; }
   .infoCol {
@@ -379,7 +384,10 @@
   .thumbStack     { height: 380px; }
 }
 
-/* Mobile — thumbnail доош орж horizontal scroll болно */
+/* =====================================================
+   MOBILE — thumbnail доор horizontal scroll болно.
+   !important ашиглаж desktop override-г дарна.
+===================================================== */
 @media (max-width: 768px) {
   .page { padding: calc(var(--nav-h) + 10px) 0 60px; }
   .bc { font-size: 11px; margin-bottom: 10px; }
@@ -388,35 +396,38 @@
   .titleRow  { margin-bottom: 12px; }
   .layout { grid-template-columns: 1fr; gap: 0; }
 
-  /* Gallery: vertical stack */
   .galleryWrapper {
-    flex-direction: column;
-    height: auto;
+    flex-direction: column !important;
+    height: auto !important;
     gap: 6px;
   }
 
-  /* Том зураг */
   .mainImgWrap {
-    width: 100%;
-    height: 260px;
+    width: 100% !important;
+    height: 260px !important;
     border-radius: var(--r-md);
+    flex: none !important;
   }
 
-  /* Thumbnail: horizontal scroll доор */
+  /* Horizontal scroll — thumbnail row */
   .thumbStack {
-    width: 100%;
-    height: 70px;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
+    width: 100% !important;
+    height: 72px !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
   }
-  .thumbStack::-webkit-scrollbar { display: none; }
+  .thumbStack::-webkit-scrollbar { display: none !important; }
+
+  /* KEY: !important тавьж desktop-ийн 90px width-г дарна */
   .thumbStackItem {
-    width: 92px;
-    min-width: 92px;
-    height: 66px;
-    flex-shrink: 0;
+    width: 92px !important;
+    min-width: 92px !important;
+    height: 66px !important;
+    min-height: 66px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
   }
 
   .navBtn { width: 32px; height: 32px; font-size: 18px; }
@@ -442,9 +453,9 @@
 @media (max-width: 480px) {
   .page { padding: calc(var(--nav-h) + 8px) 0 48px; }
   .mainTitle   { font-size: 16px; }
-  .mainImgWrap { height: 210px; border-radius: var(--r-sm); }
-  .thumbStack  { height: 60px; }
-  .thumbStackItem { width: 78px; min-width: 78px; height: 56px; }
+  .mainImgWrap { height: 210px !important; border-radius: var(--r-sm); }
+  .thumbStack  { height: 64px !important; }
+  .thumbStackItem { width: 80px !important; min-width: 80px !important; height: 58px !important; }
   .priceMain   { font-size: 20px; }
   .priceCard   { padding: 14px; }
   .specL { font-size: 10px; }
@@ -459,8 +470,8 @@
 @media (max-width: 360px) {
   .mainTitle   { font-size: 15px; }
   .priceMain   { font-size: 18px; }
-  .mainImgWrap { height: 180px; }
-  .thumbStackItem { width: 66px; min-width: 66px; height: 48px; }
+  .mainImgWrap { height: 180px !important; }
+  .thumbStackItem { width: 68px !important; min-width: 68px !important; height: 50px !important; }
   .featGrid    { grid-template-columns: 1fr; }
   .orderBtn    { font-size: 13px; padding: 11px; }
 }
