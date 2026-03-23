@@ -5,8 +5,8 @@ import styles from '../CarDetail.module.css'
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000'
 
 export default function CarGallery({ car }) {
-  const [activeImg, setImg]   = useState(0)
-  const [imgModal,  setModal] = useState(false)
+  const [activeImg, setImg]    = useState(0)
+  const [imgModal,  setModal]  = useState(false)
   const [images,    setImages] = useState([])
   const [loading,   setLoading] = useState(true)
 
@@ -54,7 +54,7 @@ export default function CarGallery({ car }) {
 
   return (
     <>
-      {/* ── Main image ── */}
+      {/* Том зураг */}
       <div className={styles.mainImgWrap}>
         {loading ? (
           <div className={styles.noImg}><div className={styles.spin} /></div>
@@ -102,13 +102,13 @@ export default function CarGallery({ car }) {
         )}
       </div>
 
-      {/* ── Horizontal thumbnail row ── */}
+      {/* Thumbnail — horizontal scroll */}
       {images.length > 1 && (
-        <div className={styles.thumbRow}>
+        <div className={styles.thumbScroll}>
           {images.map((url, i) => (
             <button
               key={i}
-              className={`${styles.thumbItem} ${activeImg === i ? styles.thumbItemActive : ''}`}
+              className={`${styles.thumbBtn} ${activeImg === i ? styles.thumbBtnActive : ''}`}
               onClick={() => setImg(i)}
             >
               <img
@@ -121,7 +121,7 @@ export default function CarGallery({ car }) {
         </div>
       )}
 
-      {/* ── Fullscreen modal ── */}
+      {/* Fullscreen modal */}
       {imgModal && currentUrl && (
         <div className={styles.modal} onClick={() => setModal(false)}>
           <button className={styles.modalClose} onClick={() => setModal(false)}>✕</button>
