@@ -11,10 +11,11 @@
   --gray-6:  #3A3A3A;
   --black:   #111111;
 
-  --gold:        #B8860B;
-  --gold-light:  #D4A017;
-  --gold-bg:     rgba(184,134,11,0.06);
-  --gold-border: rgba(184,134,11,0.18);
+  /* Gold → Red */
+  --gold:        #DC2626;
+  --gold-light:  #EF4444;
+  --gold-bg:     rgba(220,38,38,0.06);
+  --gold-border: rgba(220,38,38,0.2);
 
   --red:   #DC2626;
   --green: #16A34A;
