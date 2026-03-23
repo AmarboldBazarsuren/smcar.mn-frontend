@@ -1,10 +1,3 @@
-/**
- * CarGallery.jsx
- *
- * /api/images/encar/:id/list → байгаа index-үүдийг авна
- * Тэр index-үүдээр л зургуудыг харуулна → 404 байхгүй
- */
-
 import { useState, useEffect } from 'react'
 import { getImageUrl } from '../../services/api'
 import styles from '../CarDetail.module.css'
@@ -29,12 +22,10 @@ export default function CarGallery({ car }) {
       return
     }
 
-    // /list endpoint — байгаа index-үүдийг авна
     fetch(`${API_BASE}/api/images/encar/${car.encarId}/list`)
       .then(r => r.json())
-      .then(({ indexes, folder }) => {
+      .then(({ indexes }) => {
         if (!indexes || indexes.length === 0) {
-          // Fallback: database-д байгаа зургуудыг ашиглана
           const fallback = (car.images || []).map(img => getImageUrl(img.url)).filter(Boolean)
           setImages(fallback)
         } else {
@@ -122,12 +113,15 @@ export default function CarGallery({ car }) {
           <div className={styles.thumbStack}>
             {images.map((url, i) => (
               <button
-                key={url}
+                key={i}
                 className={`${styles.thumbStackItem} ${activeImg === i ? styles.thumbStackActive : ''}`}
                 onClick={() => setImg(i)}
               >
-                <img src={url} alt={i + 1}
-                  onError={e => { e.target.parentElement.style.display = 'none' }} />
+                <img
+                  src={url}
+                  alt={`${i + 1}`}
+                  onError={e => { e.target.parentElement.style.display = 'none' }}
+                />
               </button>
             ))}
           </div>
@@ -143,8 +137,12 @@ export default function CarGallery({ car }) {
             onClick={e => { e.stopPropagation(); setImg(i => Math.max(0, i - 1)) }}
             disabled={activeImg === 0}
           >‹</button>
-          <img src={currentUrl} alt={activeImg + 1} className={styles.modalImg}
-            onClick={e => e.stopPropagation()} />
+          <img
+            src={currentUrl}
+            alt={`${activeImg + 1}`}
+            className={styles.modalImg}
+            onClick={e => e.stopPropagation()}
+          />
           <button
             className={`${styles.modalNav} ${styles.modalNavR}`}
             onClick={e => { e.stopPropagation(); setImg(i => Math.min(images.length - 1, i + 1)) }}
