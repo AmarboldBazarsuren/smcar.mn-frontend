@@ -22,7 +22,7 @@
   line-height: 1.1; letter-spacing: -1.5px;
   color: var(--black); margin-bottom: 20px;
 }
-.accent { color: var(--gold); font-style: italic; }
+.accent { color: #DC2626; font-style: italic; }
 
 .heroSearch {
   display: flex; align-items: center; gap: 10px;
