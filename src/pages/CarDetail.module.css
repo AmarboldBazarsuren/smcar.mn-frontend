@@ -44,7 +44,7 @@
 }
 .metaDot { color: var(--gray-3); }
 
-/* Page layout */
+/* Page grid */
 .layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -53,18 +53,25 @@
 }
 .galleryCol {}
 
-/* galleryWrapper: зураг дээр, thumbnail доор */
+/* =====================================================
+   GALLERY — Desktop: зураг зүүн, thumbnail баруун
+   galleryWrapper-д fixed height өгнө.
+   Хоёр child тэр height-г дүүргэнэ.
+   thumbStack overflow-y: auto тул хэдэн зураг ч байсан
+   layout эвдэхгүй — дотроо scroll хийнэ.
+===================================================== */
 .galleryWrapper {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
+  height: 460px;
 }
 
-/* Том зураг */
 .mainImgWrap {
   position: relative;
-  width: 100%;
-  height: 420px;
+  flex: 1;
+  min-width: 0;
+  height: 460px;
   background: var(--gray-1);
   border-radius: var(--r-lg);
   overflow: hidden;
@@ -115,54 +122,48 @@
   font-size: 28px; font-weight: 800; color: var(--red); letter-spacing: 2px;
 }
 
-/* ===================================================
-   THUMBNAIL HORIZONTAL SCROLL ROW
-   Шинэ нэр: thumbScroll / thumbBtn
-   Хэзээ ч vertical болохгүй
-=================================================== */
-.thumbScroll {
+/* Thumbnail — баруун талд, дотроо vertical scroll */
+.thumbStack {
+  width: 90px;
+  flex-shrink: 0;
+  height: 460px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 5px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  height: 72px;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--gray-3) transparent;
 }
-.thumbScroll::-webkit-scrollbar { height: 3px; }
-.thumbScroll::-webkit-scrollbar-thumb { background: var(--gray-3); border-radius: 99px; }
+.thumbStack::-webkit-scrollbar { width: 3px; }
+.thumbStack::-webkit-scrollbar-thumb { background: var(--gray-3); border-radius: 99px; }
 
-.thumbBtn {
-  flex-shrink: 0;
-  width: 96px;
+.thumbStackItem {
+  width: 100%;
   height: 68px;
+  flex-shrink: 0;
   border-radius: var(--r-sm);
   overflow: hidden;
   background: var(--gray-1);
   border: 2px solid transparent;
   transition: border-color 0.15s;
   cursor: pointer;
+  display: block;
   padding: 0;
 }
-.thumbBtn img {
+.thumbStackItem img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
 }
-.thumbBtn:hover { border-color: var(--gray-3); }
-.thumbBtnActive { border-color: var(--black) !important; }
+.thumbStackItem:hover { border-color: var(--gray-3); }
+.thumbStackActive { border-color: var(--black) !important; }
 
-/* Хуучин class нэрүүдийг хадгалах (бусад хуудсанд ашиглагдаж байж болно) */
-.galleryWrapper {}
-.thumbStack     { display: none; }
-.thumbStackItem { display: none; }
-.thumbStackActive {}
+/* unused */
+.photoCount { font-size: 12px; color: var(--gray-4); margin-top: 4px; }
 .thumbGrid  { display: none; }
 .thumb      { display: none; }
 .thumbOn    {}
 .thumbMore  {}
-.photoCount { font-size: 12px; color: var(--gray-4); margin-top: 4px; }
-
 .imgLoading, .imgLoadingWrap {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -171,7 +172,7 @@
 }
 .imgCountLoading { font-size: 10px; color: var(--gray-4); animation: pulse 1s infinite; }
 .thumbLoading {
-  width: 96px; height: 68px; flex-shrink: 0;
+  width: 100%; height: 68px; flex-shrink: 0;
   border-radius: var(--r-sm); background: var(--gray-1);
   border: 1px solid var(--gray-2);
   display: flex; align-items: center; justify-content: center;
@@ -361,6 +362,7 @@
    RESPONSIVE
 ================================================ */
 
+/* Tablet */
 @media (max-width: 1024px) {
   .layout { grid-template-columns: 1fr; gap: 0; }
   .infoCol {
@@ -372,9 +374,12 @@
   }
   .infoCol > .priceCard { grid-column: 1 / -1; }
   .infoCol > .vinCard   { grid-column: 1 / -1; }
-  .mainImgWrap { height: 380px; }
+  .galleryWrapper { height: 380px; }
+  .mainImgWrap    { height: 380px; }
+  .thumbStack     { height: 380px; }
 }
 
+/* Mobile — thumbnail доош орж horizontal scroll болно */
 @media (max-width: 768px) {
   .page { padding: calc(var(--nav-h) + 10px) 0 60px; }
   .bc { font-size: 11px; margin-bottom: 10px; }
@@ -382,9 +387,38 @@
   .titleMeta { font-size: 11px; }
   .titleRow  { margin-bottom: 12px; }
   .layout { grid-template-columns: 1fr; gap: 0; }
-  .mainImgWrap { height: 240px; border-radius: var(--r-md); }
-  .thumbScroll { height: 62px; }
-  .thumbBtn    { width: 82px; height: 58px; }
+
+  /* Gallery: vertical stack */
+  .galleryWrapper {
+    flex-direction: column;
+    height: auto;
+    gap: 6px;
+  }
+
+  /* Том зураг */
+  .mainImgWrap {
+    width: 100%;
+    height: 260px;
+    border-radius: var(--r-md);
+  }
+
+  /* Thumbnail: horizontal scroll доор */
+  .thumbStack {
+    width: 100%;
+    height: 70px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .thumbStack::-webkit-scrollbar { display: none; }
+  .thumbStackItem {
+    width: 92px;
+    min-width: 92px;
+    height: 66px;
+    flex-shrink: 0;
+  }
+
   .navBtn { width: 32px; height: 32px; font-size: 18px; }
   .infoCol { position: static; display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
   .priceCard { padding: 16px; border-radius: var(--r-lg); }
@@ -408,9 +442,9 @@
 @media (max-width: 480px) {
   .page { padding: calc(var(--nav-h) + 8px) 0 48px; }
   .mainTitle   { font-size: 16px; }
-  .mainImgWrap { height: 200px; border-radius: var(--r-sm); }
-  .thumbScroll { height: 56px; }
-  .thumbBtn    { width: 74px; height: 52px; }
+  .mainImgWrap { height: 210px; border-radius: var(--r-sm); }
+  .thumbStack  { height: 60px; }
+  .thumbStackItem { width: 78px; min-width: 78px; height: 56px; }
   .priceMain   { font-size: 20px; }
   .priceCard   { padding: 14px; }
   .specL { font-size: 10px; }
@@ -426,7 +460,7 @@
   .mainTitle   { font-size: 15px; }
   .priceMain   { font-size: 18px; }
   .mainImgWrap { height: 180px; }
-  .thumbBtn    { width: 64px; height: 46px; }
+  .thumbStackItem { width: 66px; min-width: 66px; height: 48px; }
   .featGrid    { grid-template-columns: 1fr; }
   .orderBtn    { font-size: 13px; padding: 11px; }
 }
