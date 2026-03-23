@@ -4,7 +4,6 @@
   background: var(--white);
 }
 
-/* Loading / Error */
 .loadPage, .errPage {
   min-height: 70vh;
   display: flex; flex-direction: column;
@@ -22,7 +21,6 @@
 .errPage h2 { font-size: 20px; color: var(--black); font-weight: 600; }
 .errLink { color: var(--black); font-size: 13px; text-decoration: underline; }
 
-/* Breadcrumb */
 .bc {
   display: flex; align-items: center; gap: 6px;
   font-size: 12px; color: var(--gray-4);
@@ -32,7 +30,6 @@
 .bc span:last-child { color: var(--black); }
 .bcSep { color: var(--gray-3); }
 
-/* Title */
 .titleRow { margin-bottom: 20px; }
 .mainTitle {
   font-family: var(--font-display);
@@ -47,9 +44,7 @@
 }
 .metaDot { color: var(--gray-3); }
 
-/* ================================================
-   PAGE LAYOUT — 2 columns on desktop
-================================================ */
+/* Page grid */
 .layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -58,9 +53,18 @@
 }
 .galleryCol {}
 
-/* ================================================
-   MAIN IMAGE — simple fixed height, no flex tricks
-================================================ */
+/* =====================================================
+   GALLERY WRAPPER — column layout always.
+   Big image on top, thumbnails horizontal row below.
+   This NEVER breaks regardless of image count.
+===================================================== */
+.galleryWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Main image */
 .mainImgWrap {
   position: relative;
   width: 100%;
@@ -72,10 +76,8 @@
   border: 1px solid var(--gray-2);
 }
 .mainImgEl {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
   transition: transform 0.4s ease;
 }
 .mainImgWrap:hover .mainImgEl { transform: scale(1.02); }
@@ -85,7 +87,6 @@
   color: var(--gray-3);
 }
 
-/* Nav arrows */
 .navBtn {
   position: absolute; top: 50%; transform: translateY(-50%);
   width: 40px; height: 40px;
@@ -117,29 +118,30 @@
   font-size: 28px; font-weight: 800; color: var(--red); letter-spacing: 2px;
 }
 
-/* ================================================
-   THUMBNAIL ROW — horizontal scroll, ALWAYS.
-   Fixed height. Impossible to break layout.
-================================================ */
-.thumbRow {
+/* =====================================================
+   THUMBNAIL STACK — horizontal scroll.
+   flex-direction: row so it's always horizontal.
+   overflow-x: auto so any number of images just scroll.
+   Fixed height so it never pushes layout.
+===================================================== */
+.thumbStack {
   display: flex;
   flex-direction: row;
   gap: 5px;
-  margin-top: 8px;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 70px;
+  height: 72px;
   scrollbar-width: thin;
   scrollbar-color: var(--gray-3) transparent;
   padding-bottom: 2px;
 }
-.thumbRow::-webkit-scrollbar { height: 3px; }
-.thumbRow::-webkit-scrollbar-thumb { background: var(--gray-3); border-radius: 99px; }
+.thumbStack::-webkit-scrollbar { height: 3px; }
+.thumbStack::-webkit-scrollbar-thumb { background: var(--gray-3); border-radius: 99px; }
 
-.thumbItem {
+.thumbStackItem {
   flex-shrink: 0;
-  width: 94px;
-  height: 66px;
+  width: 96px;
+  height: 68px;
   border-radius: var(--r-sm);
   overflow: hidden;
   background: var(--gray-1);
@@ -149,25 +151,19 @@
   display: block;
   padding: 0;
 }
-.thumbItem img {
+.thumbStackItem img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
 }
-.thumbItem:hover { border-color: var(--gray-3); }
-.thumbItemActive { border-color: var(--black) !important; }
+.thumbStackItem:hover { border-color: var(--gray-3); }
+.thumbStackActive { border-color: var(--black) !important; }
 
-/* keep old class names so nothing breaks */
-.galleryWrapper { display: block; }
-.thumbStack     { display: none; }
-.thumbStackItem { display: none; }
-.thumbStackActive {}
+/* unused legacy */
 .photoCount { font-size: 12px; color: var(--gray-4); margin-top: 4px; }
 .thumbGrid  { display: none; }
 .thumb      { display: none; }
 .thumbOn    {}
 .thumbMore  {}
-
-/* Loading */
 .imgLoading, .imgLoadingWrap {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -176,7 +172,7 @@
 }
 .imgCountLoading { font-size: 10px; color: var(--gray-4); animation: pulse 1s infinite; }
 .thumbLoading {
-  width: 94px; height: 66px; flex-shrink: 0;
+  width: 96px; height: 68px; flex-shrink: 0;
   border-radius: var(--r-sm); background: var(--gray-1);
   border: 1px solid var(--gray-2);
   display: flex; align-items: center; justify-content: center;
@@ -289,7 +285,10 @@
 .backBtn:hover { border-color: var(--gray-3); color: var(--black); }
 
 /* Spec card */
-.specCard { background: var(--white); border: 1px solid var(--gray-2); border-radius: var(--r-xl); padding: 18px 20px; }
+.specCard {
+  background: var(--white); border: 1px solid var(--gray-2);
+  border-radius: var(--r-xl); padding: 18px 20px;
+}
 .specTitle {
   font-size: 14px; font-weight: 700; color: var(--black);
   margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--gray-2);
@@ -304,7 +303,10 @@
 .specV { font-size: 13px; font-weight: 500; color: var(--black); text-align: right; }
 
 /* History card */
-.histCard { background: var(--white); border: 1px solid var(--gray-2); border-radius: var(--r-xl); padding: 18px 20px; }
+.histCard {
+  background: var(--white); border: 1px solid var(--gray-2);
+  border-radius: var(--r-xl); padding: 18px 20px;
+}
 .histRow { display: flex; flex-direction: column; gap: 10px; }
 .histItem { display: flex; align-items: center; gap: 10px; }
 .histOk, .histWarn {
@@ -364,7 +366,6 @@
    RESPONSIVE
 ================================================ */
 
-/* Tablet 1024px */
 @media (max-width: 1024px) {
   .layout { grid-template-columns: 1fr; gap: 0; }
   .infoCol {
@@ -379,25 +380,18 @@
   .mainImgWrap { height: 380px; }
 }
 
-/* Mobile 768px */
 @media (max-width: 768px) {
   .page { padding: calc(var(--nav-h) + 10px) 0 60px; }
   .bc { font-size: 11px; margin-bottom: 10px; }
   .mainTitle { font-size: 18px; }
   .titleMeta { font-size: 11px; }
   .titleRow  { margin-bottom: 12px; }
-
   .layout { grid-template-columns: 1fr; gap: 0; }
-
   .mainImgWrap { height: 240px; border-radius: var(--r-md); }
-
-  .thumbRow  { height: 60px; }
-  .thumbItem { width: 80px; height: 56px; }
-
+  .thumbStack  { height: 62px; }
+  .thumbStackItem { width: 82px; height: 58px; }
   .navBtn { width: 32px; height: 32px; font-size: 18px; }
-
   .infoCol { position: static; display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-
   .priceCard { padding: 16px; border-radius: var(--r-lg); }
   .priceMain { font-size: 24px; }
   .pRow      { font-size: 12px; }
@@ -405,27 +399,23 @@
   .specL     { font-size: 11px; }
   .specV     { font-size: 12px; }
   .histCard  { padding: 14px 16px; border-radius: var(--r-lg); }
-
   .featuresSection { margin-top: 20px; padding-top: 16px; }
   .sectionTitle    { font-size: 14px; }
   .featGrid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
   .featItem { font-size: 11px; padding: 5px 8px; }
-
   .orderBtn { font-size: 14px; padding: 12px; }
   .messengerBtn, .whatsappBtn { font-size: 13px; padding: 10px 14px; }
-
   .modalNav  { width: 38px; height: 38px; font-size: 20px; }
   .modalNavL { left: 8px; }
   .modalNavR { right: 8px; }
 }
 
-/* 480px */
 @media (max-width: 480px) {
   .page { padding: calc(var(--nav-h) + 8px) 0 48px; }
   .mainTitle   { font-size: 16px; }
   .mainImgWrap { height: 200px; border-radius: var(--r-sm); }
-  .thumbRow    { height: 54px; }
-  .thumbItem   { width: 72px; height: 50px; }
+  .thumbStack  { height: 56px; }
+  .thumbStackItem { width: 74px; height: 52px; }
   .priceMain   { font-size: 20px; }
   .priceCard   { padding: 14px; }
   .specL { font-size: 10px; }
@@ -437,12 +427,11 @@
   .modalClose { top: 10px; right: 10px; }
 }
 
-/* 360px */
 @media (max-width: 360px) {
   .mainTitle   { font-size: 15px; }
   .priceMain   { font-size: 18px; }
   .mainImgWrap { height: 180px; }
-  .thumbItem   { width: 62px; height: 44px; }
+  .thumbStackItem { width: 64px; height: 46px; }
   .featGrid    { grid-template-columns: 1fr; }
   .orderBtn    { font-size: 13px; padding: 11px; }
 }
