@@ -62,16 +62,24 @@
 /* ─── Gallery ─── */
 .galleryCol {}
 
+/* Gallery wrapper: зүүн том зураг + баруун thumbnail stack */
+.galleryWrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
 .mainImgWrap {
   position: relative;
   width: 100%;
-  /* aspect-ratio: 16/9; */
+  aspect-ratio: 4/3;
   background: var(--gray-1);
   border-radius: var(--r-lg);
   overflow: hidden;
   cursor: zoom-in;
   border: 1px solid var(--gray-2);
-    /* max-height: 480px; */
+  flex: 1;
+  min-width: 0;
 }
 .mainImgEl {
   width: 100%; height: 100%;
@@ -173,6 +181,53 @@
   color: #fff; font-size: 16px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   border-radius: var(--r-sm);
+}
+
+/* Баруун thumbnail stack */
+.thumbStack {
+  width: 96px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 480px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-3) transparent;
+}
+
+.thumbStack::-webkit-scrollbar {
+  width: 3px;
+}
+.thumbStack::-webkit-scrollbar-thumb {
+  background: var(--gray-3);
+  border-radius: 99px;
+}
+
+.thumbStackItem {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--gray-1);
+  border: 2px solid transparent;
+  transition: border-color 0.15s, opacity 0.15s;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.thumbStackItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbStackItem:hover {
+  border-color: var(--gray-3);
+}
+
+.thumbStackActive {
+  border-color: var(--black) !important;
 }
 
 /* Features */
@@ -348,6 +403,140 @@
 .vinLabel { font-size: 11px; color: var(--gray-4); font-weight: 600; letter-spacing: 0.5px; }
 .vinVal { font-size: 12px; font-weight: 600; color: var(--gray-6); font-family: monospace; }
 
+/* Захиалах товч */
+.orderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: #DC2626;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: var(--r-md);
+  margin-top: 12px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: var(--font-body);
+}
+.orderBtn:hover {
+  background: #B91C1C;
+  transform: translateY(-1px);
+}
+
+.orderPanel {
+  background: var(--gray-0);
+  border: 1px solid var(--gray-2);
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideDown 0.2s ease both;
+}
+
+.orderTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gray-4);
+  margin-bottom: 2px;
+}
+
+.messengerBtn,
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: var(--font-body);
+}
+.messengerBtn:hover,
+.whatsappBtn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+.messengerBtn {
+  background: #0084FF;
+  color: #fff;
+}
+.whatsappBtn {
+  background: #25D366;
+  color: #fff;
+}
+
+.orderCarInfo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1px solid var(--gray-2);
+  border-radius: var(--r-sm);
+}
+.orderCarLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-4);
+  white-space: nowrap;
+}
+.orderCarValue {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--black);
+  word-break: break-all;
+}
+
+/* Зураг ачааллаж байх үеийн indicator */
+.imgLoadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--gray-4);
+  font-size: 13px;
+}
+
+.imgCountLoading {
+  font-size: 10px;
+  color: var(--gray-4);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.thumbLoading {
+  aspect-ratio: 4/3;
+  border-radius: var(--r-sm);
+  background: var(--gray-1);
+  border: 1px solid var(--gray-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinSm {
+  width: 16px; height: 16px;
+  border: 2px solid var(--gray-2);
+  border-top-color: var(--gray-4);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
 /* ── Full screen modal ── */
 .modal {
   position: fixed; inset: 0; z-index: 1000;
@@ -386,229 +575,10 @@
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
   color: rgba(255,255,255,0.6); font-size: 13px;
 }
-/* CarDetail.module.css-д НЭМЭХ style-ууд */
 
-/* Зураг ачааллаж байх үеийн indicator */
-.imgLoadingWrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--gray-4);
-  font-size: 13px;
-}
-
-.imgCountLoading {
-  font-size: 10px;
-  color: var(--gray-4);
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-
-/* Thumbnail loading placeholder */
-.thumbLoading {
-  aspect-ratio: 4/3;
-  border-radius: var(--r-sm);
-  background: var(--gray-1);
-  border: 1px solid var(--gray-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.spinSm {
-  width: 16px; height: 16px;
-  border: 2px solid var(--gray-2);
-  border-top-color: var(--gray-4);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-/* ─────────────────────────────────────────
-   CarDetail.module.css-д НЭМЭХ style-ууд
-   .galleryWrapper болон thumbnail stack
-   ───────────────────────────────────────── */
-
-/* Gallery wrapper: зүүн том зураг + баруун thumbnail stack */
-.galleryWrapper {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-
-/* Том зураг — flex-ийн үлдсэн хэсэг авна */
-.galleryWrapper .mainImgWrap {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Баруун thumbnail stack */
-.thumbStack {
-  width: 96px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  max-height: 480px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-3) transparent;
-}
-
-.thumbStack::-webkit-scrollbar {
-  width: 3px;
-}
-.thumbStack::-webkit-scrollbar-thumb {
-  background: var(--gray-3);
-  border-radius: 99px;
-}
-
-.thumbStackItem {
-  width: 100%;
-  aspect-ratio: 4/3;
-  border-radius: var(--r-sm);
-  overflow: hidden;
-  background: var(--gray-1);
-  border: 2px solid transparent;
-  transition: border-color 0.15s, opacity 0.15s;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.thumbStackItem img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.thumbStackItem:hover {
-  border-color: var(--gray-3);
-}
-
-.thumbStackActive {
-  border-color: var(--black) !important;
-}
-
-/* Mobile: thumbnail stack доош орно */
-@media (max-width: 640px) {
-  .galleryWrapper {
-    flex-direction: column;
-  }
-
-  .thumbStack {
-    width: 100%;
-    flex-direction: row;
-    max-height: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 4px;
-  }
-
-  .thumbStackItem {
-    width: 72px;
-    min-width: 72px;
-  }
-}
-.orderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  background: #DC2626;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  padding: 14px;
-  border-radius: var(--r-md);
-  margin-top: 12px;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
-  font-family: var(--font-body);
-}
-.orderBtn:hover {
-  background: #B91C1C;
-  transform: translateY(-1px);
-}
- 
-.orderPanel {
-  background: var(--gray-0);
-  border: 1px solid var(--gray-2);
-  border-radius: var(--r-md);
-  padding: 14px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  animation: slideDown 0.2s ease both;
-}
- 
-.orderTitle {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--gray-4);
-  margin-bottom: 2px;
-}
- 
-.messengerBtn,
-.whatsappBtn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  border-radius: var(--r-md);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: opacity 0.15s, transform 0.1s;
-  font-family: var(--font-body);
-}
-.messengerBtn:hover,
-.whatsappBtn:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
-}
-.messengerBtn {
-  background: #0084FF;
-  color: #fff;
-}
-.whatsappBtn {
-  background: #25D366;
-  color: #fff;
-}
- 
-.orderCarInfo {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 10px;
-  margin-top: 4px;
-  padding: 10px 12px;
-  background: var(--white);
-  border: 1px solid var(--gray-2);
-  border-radius: var(--r-sm);
-}
-.orderCarLabel {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gray-4);
-  white-space: nowrap;
-}
-.orderCarValue {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--black);
-  word-break: break-all;
-}
-/* Thumbnail grid — илүү олон column */
-
- 
-/* Нийт зургийн тоо */
+/* ══════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════ */
 
 @media (max-width: 1024px) {
   .layout {
@@ -625,20 +595,18 @@
     max-height: 400px;
   }
 }
- 
+
 @media (max-width: 768px) {
   .page {
     padding: calc(var(--nav-h) + 12px) 0 60px;
   }
- 
-  /* Breadcrumb */
+
   .bc {
     font-size: 11px;
     flex-wrap: wrap;
     margin-bottom: 10px;
   }
- 
-  /* Title */
+
   .mainTitle {
     font-size: 18px;
   }
@@ -649,11 +617,18 @@
   .titleRow {
     margin-bottom: 12px;
   }
- 
-  /* Gallery — зураг доош, thumbnail хажуу */
+
+  /* Галерей — зураг доош, thumbnail хажуу дор */
   .galleryWrapper {
     flex-direction: column;
     gap: 6px;
+  }
+  .mainImgWrap {
+    border-radius: var(--r-md);
+    aspect-ratio: 4/3;
+  }
+  .mainImgEl {
+    object-fit: cover;
   }
   .thumbStack {
     width: 100%;
@@ -669,23 +644,13 @@
     min-width: 64px;
     flex-shrink: 0;
   }
-  .mainImgWrap {
-    border-radius: var(--r-md);
-    max-height: 260px;
-  }
-  .mainImgEl {
-    max-height: 260px;
-    object-fit: cover;
-  }
- 
-  /* Nav buttons */
+
   .navBtn {
     width: 32px;
     height: 32px;
     font-size: 18px;
   }
- 
-  /* Features grid */
+
   .featGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 4px;
@@ -698,8 +663,7 @@
     margin-top: 20px;
     padding-top: 16px;
   }
- 
-  /* Price card */
+
   .priceCard {
     padding: 16px;
     border-radius: var(--r-lg);
@@ -707,8 +671,7 @@
   .priceMain {
     font-size: 22px;
   }
- 
-  /* Spec card */
+
   .specCard {
     padding: 14px 16px;
     border-radius: var(--r-lg);
@@ -722,14 +685,12 @@
   .specV {
     font-size: 12px;
   }
- 
-  /* Hist card */
+
   .histCard {
     padding: 14px 16px;
     border-radius: var(--r-lg);
   }
- 
-  /* Order panel */
+
   .orderBtn {
     font-size: 14px;
     padding: 12px;
@@ -739,36 +700,35 @@
     font-size: 13px;
     padding: 10px 14px;
   }
- 
-  /* Thumb grid (хуучин хэсэг хэрэв байвал) */
+
   .thumbGrid {
     grid-template-columns: repeat(4, 1fr);
     gap: 4px;
   }
 }
- 
+
 @media (max-width: 480px) {
   .page {
     padding: calc(var(--nav-h) + 8px) 0 48px;
   }
- 
+
   .mainTitle {
     font-size: 16px;
   }
- 
+
   .mainImgWrap {
-    max-height: 220px;
+    aspect-ratio: 4/3;
     border-radius: var(--r-sm);
   }
   .mainImgEl {
-    max-height: 220px;
+    object-fit: cover;
   }
- 
+
   .thumbStackItem {
     width: 52px;
     min-width: 52px;
   }
- 
+
   .featGrid {
     grid-template-columns: 1fr 1fr;
   }
@@ -776,24 +736,23 @@
     font-size: 10px;
     padding: 4px 6px;
   }
- 
+
   .priceMain {
     font-size: 20px;
     letter-spacing: -0.5px;
   }
- 
+
   .pRow {
     font-size: 12px;
   }
- 
+
   .specL { font-size: 11px; }
   .specV { font-size: 11px; }
- 
+
   .thumbGrid {
     grid-template-columns: repeat(3, 1fr);
   }
- 
-  /* VIN card */
+
   .vinCard {
     flex-direction: column;
     align-items: flex-start;
@@ -803,8 +762,7 @@
   .vinVal {
     font-size: 11px;
   }
- 
-  /* Modal */
+
   .modalNav {
     width: 36px;
     height: 36px;
