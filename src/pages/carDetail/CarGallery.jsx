@@ -4,11 +4,22 @@ import styles from '../CarDetail.module.css'
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000'
 
+// Thumbnail-ийн хэмжээ — CSS override болохгүй, inline style
+const THUMB_DESKTOP = { width: 90, height: 68 }
+const THUMB_MOBILE  = { width: 88, height: 64 }
+
 export default function CarGallery({ car }) {
   const [activeImg, setImg]    = useState(0)
   const [imgModal,  setModal]  = useState(false)
   const [images,    setImages] = useState([])
   const [loading,   setLoading] = useState(true)
+  const [isMobile,  setMobile]  = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   useEffect(() => {
     setImg(0)
@@ -16,8 +27,7 @@ export default function CarGallery({ car }) {
     setLoading(true)
 
     if (car.isManual || !car.encarId) {
-      const imgs = (car.images || []).map(img => getImageUrl(img.url)).filter(Boolean)
-      setImages(imgs)
+      setImages((car.images || []).map(img => getImageUrl(img.url)).filter(Boolean))
       setLoading(false)
       return
     }
@@ -50,16 +60,64 @@ export default function CarGallery({ car }) {
     return () => window.removeEventListener('keydown', fn)
   }, [images.length])
 
+  const thumb = isMobile ? THUMB_MOBILE : THUMB_DESKTOP
   const currentUrl = images[activeImg] || null
+
+  // Desktop: зураг зүүн + thumb баруун
+  // Mobile:  зураг дээр + thumb доор horizontal scroll
+  const wrapperStyle = isMobile
+    ? { display: 'flex', flexDirection: 'column', gap: 6 }
+    : { display: 'flex', flexDirection: 'row', gap: 8, height: 460 }
+
+  const mainStyle = isMobile
+    ? { height: 260 }
+    : { height: 460 }
+
+  const stackStyle = isMobile
+    ? {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 5,
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        height: thumb.height + 6,
+        scrollbarWidth: 'none',
+      }
+    : {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 5,
+        width: thumb.width,
+        height: 460,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        flexShrink: 0,
+        scrollbarWidth: 'thin',
+      }
+
+  const thumbItemStyle = {
+    width:     thumb.width,
+    minWidth:  thumb.width,
+    height:    thumb.height,
+    minHeight: thumb.height,
+    flexShrink: 0,
+    flexGrow:   0,
+    borderRadius: 6,
+    overflow: 'hidden',
+    background: 'var(--gray-1)',
+    border: '2px solid transparent',
+    cursor: 'pointer',
+    padding: 0,
+    display: 'block',
+    boxSizing: 'border-box',
+  }
 
   return (
     <>
-      {/* Desktop: том зураг зүүн + thumbnail баруун */}
-      {/* Mobile: том зураг дээр + thumbnail доор scroll */}
-      <div className={styles.galleryWrapper}>
+      <div style={wrapperStyle}>
 
         {/* Том зураг */}
-        <div className={styles.mainImgWrap}>
+        <div className={styles.mainImgWrap} style={mainStyle}>
           {loading ? (
             <div className={styles.noImg}><div className={styles.spin} /></div>
           ) : currentUrl ? (
@@ -106,18 +164,24 @@ export default function CarGallery({ car }) {
           )}
         </div>
 
-        {/* Thumbnail */}
+        {/* Thumbnails */}
         {images.length > 1 && (
-          <div className={styles.thumbStack}>
+          <div style={stackStyle}>
             {images.map((url, i) => (
               <button
                 key={i}
-                className={`${styles.thumbStackItem} ${activeImg === i ? styles.thumbStackActive : ''}`}
+                style={{
+                  ...thumbItemStyle,
+                  border: activeImg === i
+                    ? '2px solid #111'
+                    : '2px solid transparent',
+                }}
                 onClick={() => setImg(i)}
               >
                 <img
                   src={url}
                   alt={`${i + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   onError={e => { e.target.parentElement.style.display = 'none' }}
                 />
               </button>
