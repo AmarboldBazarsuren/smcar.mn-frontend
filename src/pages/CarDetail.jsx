@@ -1,10 +1,21 @@
+/**
+ * CarDetail.jsx  ←  үндсэн хуудас (orchestrator)
+ *
+ * Дэд компонентууд:
+ *   carDetail/CarGallery.jsx      — зургийн галерей + fullscreen
+ *   carDetail/CarFeatures.jsx     — тоноглол, онцлог
+ *   carDetail/CarInfoPanel.jsx    — үнэ, spec, түүх
+ *   carDetail/carDetailHelpers.jsx — PRow, SpecRow, HistItem, groupFeatures
+ */
+
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { vehicleAPI, fuelTypeLabel, transmissionLabel } from '../services/api'
+import { useParams, Link }      from 'react-router-dom'
+import { vehicleAPI, fuelTypeLabel, transmissionLabel, formatMileage, carAge } from '../services/api'
+
 import CarGallery   from './carDetail/CarGallery'
 import CarFeatures  from './carDetail/CarFeatures'
 import CarInfoPanel from './carDetail/CarInfoPanel'
-import styles from './CarDetail.module.css'
+import styles       from './CarDetail.module.css'
 
 export default function CarDetail() {
   const { id } = useParams()
@@ -13,12 +24,14 @@ export default function CarDetail() {
   const [error,   setError]   = useState(null)
 
   useEffect(() => {
-    setLoading(true); setError(null)
+    setLoading(true)
+    setError(null)
     vehicleAPI.getById(id)
       .then(res => { setCar(res?.data || null); setLoading(false) })
       .catch(e  => { setError(String(e));       setLoading(false) })
   }, [id])
 
+  // ── Loading ──
   if (loading) return (
     <div className={styles.loadPage}>
       <div className={styles.spin} />
@@ -26,6 +39,7 @@ export default function CarDetail() {
     </div>
   )
 
+  // ── Error / Not found ──
   if (error || !car) return (
     <div className={styles.errPage}>
       <span className={styles.errIcon}>🚗</span>
@@ -47,30 +61,45 @@ export default function CarDetail() {
           <span>{car.brand} {car.model}</span>
         </nav>
 
-        {/* Title */}
+        {/* Гарчиг */}
         <div className={styles.titleRow}>
-          <h1 className={styles.mainTitle}>
-            {car.brand} {car.model}
-            {car.badge && <span className={styles.badgeText}> {car.badge}</span>}
-          </h1>
-          <div className={styles.titleMeta}>
-            {car.year && <span className={styles.metaChip}>{car.year}он</span>}
-            {car.mileage > 0 && <span className={styles.metaChip}>{car.mileage.toLocaleString()} км</span>}
-            {car.fuelType && <span className={styles.metaChip}>{fuelTypeLabel[car.fuelType] || car.fuelType}</span>}
-            {car.transmission && <span className={styles.metaChip}>{transmissionLabel[car.transmission] || car.transmission}</span>}
+          <div>
+            <h1 className={styles.mainTitle}>
+              {car.brand} {car.model}
+              {car.badge && <span className={styles.badgeText}> {car.badge}</span>}
+            </h1>
+            <div className={styles.titleMeta}>
+              {car.year && <span>{car.year}он</span>}
+              {car.mileage > 0 && (
+                <><span className={styles.metaDot}>·</span>
+                  <span>{car.mileage.toLocaleString()}km</span></>
+              )}
+              {car.fuelType && (
+                <><span className={styles.metaDot}>·</span>
+                  <span>{fuelTypeLabel[car.fuelType] || car.fuelType}</span></>
+              )}
+              {car.transmission && (
+                <><span className={styles.metaDot}>·</span>
+                  <span>{transmissionLabel[car.transmission] || car.transmission}</span></>
+              )}
+              {car.engineSize && (
+                <><span className={styles.metaDot}>·</span>
+                  <span>{car.engineSize}</span></>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Layout */}
+        {/* Үндсэн layout */}
         <div className={styles.layout}>
 
-          {/* Left: gallery + features */}
+          {/* Зүүн багана: галерей + тоноглол */}
           <div className={styles.galleryCol}>
             <CarGallery car={car} />
             <CarFeatures features={car.features} />
           </div>
 
-          {/* Right: price + spec + history */}
+          {/* Баруун багана: үнэ + мэдээлэл + түүх */}
           <CarInfoPanel car={car} />
 
         </div>
