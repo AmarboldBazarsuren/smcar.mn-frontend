@@ -4,7 +4,7 @@
   background: var(--white);
 }
 
-/* ─── Loading / Error ─── */
+/* Loading / Error */
 .loadPage, .errPage {
   min-height: 70vh;
   display: flex; flex-direction: column;
@@ -22,7 +22,7 @@
 .errPage h2 { font-size: 20px; color: var(--black); font-weight: 600; }
 .errLink { color: var(--black); font-size: 13px; text-decoration: underline; }
 
-/* ─── Breadcrumb ─── */
+/* Breadcrumb */
 .bc {
   display: flex; align-items: center; gap: 6px;
   font-size: 12px; color: var(--gray-4);
@@ -32,7 +32,7 @@
 .bc span:last-child { color: var(--black); }
 .bcSep { color: var(--gray-3); }
 
-/* ─── Title ─── */
+/* Title */
 .titleRow { margin-bottom: 20px; }
 .mainTitle {
   font-family: var(--font-display);
@@ -47,7 +47,7 @@
 }
 .metaDot { color: var(--gray-3); }
 
-/* ─── Page layout: 2 columns ─── */
+/* Page layout */
 .layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -56,27 +56,26 @@
 }
 .galleryCol {}
 
-/* ══════════════════════════════════════════
-   GALLERY — THE FIX
-   galleryWrapper has a fixed height.
-   mainImgWrap fills that height.
-   thumbStack also fills that height and
-   scrolls internally — so it NEVER pushes
-   the layout no matter how many images.
-══════════════════════════════════════════ */
+/* ==============================================
+   GALLERY - CORE FIX
+   Fixed height on wrapper. thumbStack gets
+   height:100% + overflow-y:auto so it scrolls
+   internally instead of expanding the layout.
+   Works with 4 images or 40 images.
+============================================== */
 .galleryWrapper {
   display: flex;
   flex-direction: row;
   gap: 8px;
-  height: 460px;            /* fixed — prevents ANY overflow */
-  overflow: hidden;         /* safety net */
+  height: 460px;
+  overflow: hidden;
 }
 
 .mainImgWrap {
   position: relative;
   flex: 1;
   min-width: 0;
-  height: 100%;             /* fills galleryWrapper height */
+  height: 460px;
   background: var(--gray-1);
   border-radius: var(--r-lg);
   overflow: hidden;
@@ -132,11 +131,11 @@
   font-size: 28px; font-weight: 800; color: var(--red); letter-spacing: 2px;
 }
 
-/* ── Thumbnail stack: fixed height, internal scroll ── */
+/* Thumbnail stack - scrolls internally, never expands */
 .thumbStack {
   width: 88px;
   flex-shrink: 0;
-  height: 100%;             /* = galleryWrapper height */
+  height: 460px;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -150,8 +149,8 @@
 
 .thumbStackItem {
   width: 100%;
-  flex-shrink: 0;           /* NEVER shrink — scroll instead */
-  aspect-ratio: 4 / 3;
+  height: 66px;        /* fixed px height - no aspect-ratio conflicts */
+  flex-shrink: 0;
   border-radius: var(--r-sm);
   overflow: hidden;
   background: var(--gray-1);
@@ -168,7 +167,7 @@
 .thumbStackItem:hover { border-color: var(--gray-3); }
 .thumbStackActive { border-color: var(--black) !important; }
 
-/* Legacy/fallback */
+/* Legacy fallbacks */
 .photoCount { font-size: 12px; color: var(--gray-4); margin-top: 6px; text-align: right; }
 .thumbGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 8px; }
 .thumb {
@@ -185,7 +184,7 @@
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Loading */
+/* Loading states */
 .imgLoading, .imgLoadingWrap {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -194,7 +193,7 @@
 }
 .imgCountLoading { font-size: 10px; color: var(--gray-4); animation: pulse 1s infinite; }
 .thumbLoading {
-  aspect-ratio: 4/3; border-radius: var(--r-sm);
+  width: 100%; height: 66px; border-radius: var(--r-sm);
   background: var(--gray-1); border: 1px solid var(--gray-2);
   display: flex; align-items: center; justify-content: center;
 }
@@ -204,7 +203,7 @@
   animation: spin 0.7s linear infinite;
 }
 
-/* ─── Features ─── */
+/* Features */
 .featuresSection {
   margin-top: 28px; border-top: 1px solid var(--gray-2); padding-top: 24px;
 }
@@ -223,13 +222,13 @@
 }
 .featItem svg { color: var(--green); flex-shrink: 0; margin-top: 1px; }
 
-/* ─── Info column ─── */
+/* Info column */
 .infoCol {
   position: sticky; top: calc(var(--nav-h) + 16px);
   display: flex; flex-direction: column; gap: 14px;
 }
 
-/* ─── Price card ─── */
+/* Price card */
 .priceCard {
   background: var(--white); border: 1px solid var(--gray-2);
   border-radius: var(--r-xl); padding: 20px 22px; box-shadow: var(--shadow-sm);
@@ -305,7 +304,7 @@
 }
 .backBtn:hover { border-color: var(--gray-3); color: var(--black); }
 
-/* ─── Spec card ─── */
+/* Spec card */
 .specCard { background: var(--white); border: 1px solid var(--gray-2); border-radius: var(--r-xl); padding: 18px 20px; }
 .specTitle {
   font-size: 14px; font-weight: 700; color: var(--black);
@@ -320,7 +319,7 @@
 .specL { font-size: 12px; color: var(--gray-4); flex-shrink: 0; }
 .specV { font-size: 13px; font-weight: 500; color: var(--black); text-align: right; }
 
-/* ─── History card ─── */
+/* History card */
 .histCard { background: var(--white); border: 1px solid var(--gray-2); border-radius: var(--r-xl); padding: 18px 20px; }
 .histRow { display: flex; flex-direction: column; gap: 10px; }
 .histItem { display: flex; align-items: center; gap: 10px; }
@@ -336,7 +335,7 @@
 .histValOk   { color: var(--green); }
 .histValWarn { color: #D97706; }
 
-/* ─── VIN ─── */
+/* VIN */
 .vinCard {
   background: var(--gray-0); border: 1px solid var(--gray-2);
   border-radius: var(--r-md); padding: 10px 14px;
@@ -345,7 +344,7 @@
 .vinLabel { font-size: 11px; color: var(--gray-4); font-weight: 600; letter-spacing: 0.5px; }
 .vinVal { font-size: 12px; font-weight: 600; color: var(--gray-6); font-family: monospace; }
 
-/* ─── Fullscreen modal ─── */
+/* Modal */
 .modal {
   position: fixed; inset: 0; z-index: 1000;
   background: rgba(0,0,0,0.92);
@@ -375,19 +374,15 @@
   color: rgba(255,255,255,0.6); font-size: 13px;
 }
 
-/* ─── Keyframes ─── */
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* ══════════════════════════════════════════
+/* ================================================
    RESPONSIVE
-══════════════════════════════════════════ */
+================================================ */
 
-/* ── Tablet 1024px ── */
+/* Tablet 1024px */
 @media (max-width: 1024px) {
-  .layout {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
+  .layout { grid-template-columns: 1fr; gap: 0; }
   .infoCol {
     position: static;
     display: grid;
@@ -397,14 +392,14 @@
   }
   .infoCol > .priceCard { grid-column: 1 / -1; }
   .infoCol > .vinCard   { grid-column: 1 / -1; }
-
   .galleryWrapper { height: 400px; }
+  .mainImgWrap    { height: 400px; }
+  .thumbStack     { height: 400px; }
 }
 
-/* ── Mobile 768px ── */
+/* Mobile 768px */
 @media (max-width: 768px) {
   .page { padding: calc(var(--nav-h) + 10px) 0 60px; }
-
   .bc { font-size: 11px; margin-bottom: 10px; }
   .mainTitle { font-size: 18px; }
   .titleMeta { font-size: 11px; gap: 4px; }
@@ -412,50 +407,36 @@
 
   .layout { grid-template-columns: 1fr; gap: 0; }
 
-  /* ─── GALLERY: stack vertically on mobile ─── */
+  /* Gallery: vertical stack */
   .galleryWrapper {
     flex-direction: column;
-    height: auto;           /* no fixed height on mobile */
-    gap: 6px;
+    height: auto;
     overflow: visible;
+    gap: 6px;
   }
 
-  /* Main image: use aspect-ratio now that height is auto */
+  /* Main image: fixed height on mobile */
   .mainImgWrap {
     width: 100%;
-    height: 0;
-    padding-bottom: 62.5%;  /* 16:10 ratio — avoids aspect-ratio browser quirks */
-    position: relative;
+    height: 240px;
     border-radius: var(--r-md);
   }
-  .mainImgEl {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-  .noImg {
-    position: absolute;
-    inset: 0;
-  }
 
-  /* Thumbnails: horizontal scrolling row */
+  /* Thumbnails: horizontal scroll row */
   .thumbStack {
     width: 100%;
-    height: auto;
+    height: 58px;
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
     gap: 5px;
-    padding-bottom: 2px;
     scrollbar-width: none;
   }
   .thumbStack::-webkit-scrollbar { display: none; }
   .thumbStackItem {
-    width: 68px;
-    min-width: 68px;
-    height: 51px;
-    aspect-ratio: unset;    /* override the 4/3 so height is fixed */
+    width: 76px;
+    min-width: 76px;
+    height: 54px;
     flex-shrink: 0;
   }
 
@@ -464,16 +445,13 @@
   /* Info column: single column */
   .infoCol {
     position: static;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
+    display: flex; flex-direction: column;
+    gap: 12px; margin-top: 16px;
   }
 
   .priceCard { padding: 16px; border-radius: var(--r-lg); }
   .priceMain { font-size: 24px; }
   .pRow      { font-size: 12px; }
-
   .specCard  { padding: 14px 16px; border-radius: var(--r-lg); }
   .specL     { font-size: 11px; }
   .specV     { font-size: 12px; }
@@ -490,17 +468,17 @@
   .modalNav  { width: 38px; height: 38px; font-size: 20px; }
   .modalNavL { left: 8px; }
   .modalNavR { right: 8px; }
-
   .thumbGrid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
 }
 
-/* ── Small 480px ── */
+/* Small 480px */
 @media (max-width: 480px) {
   .page { padding: calc(var(--nav-h) + 8px) 0 48px; }
   .mainTitle { font-size: 16px; }
-  .mainImgWrap { border-radius: var(--r-sm); }
-  .thumbStackItem { width: 56px; min-width: 56px; height: 42px; }
-  .priceMain { font-size: 20px; letter-spacing: -0.5px; }
+  .mainImgWrap { height: 200px; border-radius: var(--r-sm); }
+  .thumbStack  { height: 50px; }
+  .thumbStackItem { width: 66px; min-width: 66px; height: 46px; }
+  .priceMain { font-size: 20px; }
   .priceCard { padding: 14px; }
   .specL { font-size: 10px; }
   .specV { font-size: 11px; }
@@ -513,11 +491,12 @@
   .modalClose { top: 10px; right: 10px; }
 }
 
-/* ── 360px ── */
+/* 360px */
 @media (max-width: 360px) {
   .mainTitle { font-size: 15px; }
   .priceMain { font-size: 18px; }
-  .thumbStackItem { width: 48px; min-width: 48px; height: 36px; }
+  .mainImgWrap { height: 180px; }
+  .thumbStackItem { width: 56px; min-width: 56px; height: 40px; }
   .featGrid { grid-template-columns: 1fr; }
   .orderBtn { font-size: 13px; padding: 11px; }
   .messengerBtn, .whatsappBtn { font-size: 12px; padding: 9px 12px; }
